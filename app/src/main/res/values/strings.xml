@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">SDV Editor</string>
+    <string name="refresh_remote_sdv_files">refresh original</string>
+    <string name="refresh_local_sdv_files">refresh copies</string>
+    <string name="copy_from_sdv_to_local">fetch \u2B07</string>
+    <string name="copy_to_sdv_from_local">push \u2B06</string>
+    <string name="edit_local">edit</string>
+    <string name="editor_header">SDV Editor</string>
+    <string name="save_changes">save changes \u2714</string>
+</resources>
