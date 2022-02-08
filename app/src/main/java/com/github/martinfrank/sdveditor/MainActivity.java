@@ -1,6 +1,7 @@
 package com.github.martinfrank.sdveditor;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.github.martinfrank.sdvedit.SdvFileManager;
 import com.github.martinfrank.sdvedit.SdvFileSet;
 
 import java.util.Collections;
@@ -29,15 +31,18 @@ public class MainActivity extends AppCompatActivity {
     private Button remoteRefreshButton;
     private Button localRefreshButton;
     private Button fetchButton;
-    private Button editButton;
     private SdvFilesRefreshTask remoteSdvFilesRefreshTask;
     private SdvFilesRefreshTask localSdvFilesRefreshTask;
-    private SdvFileCopyTask sdvFileCopyTask;
+    private SdvFileSdvFileCopyOverwriteTask copyRemoteToLocalOverrideTask;
+    private SdvFileSdvFileCopyIncreaseIndexTask copyRemoteToLocalIncreaseIndexTask;
     private Handler handler;
     private SdvFileSetAdapter remoteSdvFileSetAdapter;
     private SdvFileSetAdapter localSdvFileSetAdapter;
     private TextView remoteSdvInfoTextView;
     private TextView localSdvInfoTextView;
+    private SdvFileManager remoteSdvFileManager;
+    private SdvFileManager localSdvFileManager;
+
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
@@ -49,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
                 new String[]{Manifest.permission.MANAGE_EXTERNAL_STORAGE}, 4711);
 
         console = new Console(findViewById(R.id.console));
-        
-        editButton = findViewById(R.id.edit_local);
+
+        Button editButton = findViewById(R.id.edit_local);
         editButton.setOnClickListener(view -> startEditor());
 
         RecyclerView remoteSdvFilesRecyclerView = findViewById(R.id.remote_sdv_files);
@@ -60,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
 
         remoteSdvInfoTextView = findViewById(R.id.sdv_file_info);
         localSdvInfoTextView = findViewById(R.id.local_file_info);
+
+        remoteSdvFileManager = new SdvFileManager(getExternalStorageDirectory());
+        localSdvFileManager = new SdvFileManager(getFilesDir());
 
         remoteSdvFileSetAdapter = new SdvFileSetAdapter(Collections.emptyList(), remoteSdvFilesOnclickListener);
         remoteSdvFilesRecyclerView.setAdapter(remoteSdvFileSetAdapter);
@@ -85,17 +93,19 @@ public class MainActivity extends AppCompatActivity {
         fetchButton = findViewById(R.id.copy_from_remote_to_local);
         fetchButton.setOnClickListener(view -> copyFromRemoteToLocal());
 
-        remoteSdvFilesRefreshTask = new SdvFilesRefreshTask(getExternalStorageDirectory(), remoteSdvFileSetAdapter, remoteRefreshButton);
-        localSdvFilesRefreshTask = new SdvFilesRefreshTask(getFilesDir(), localSdvFileSetAdapter, localRefreshButton);
+        remoteSdvFilesRefreshTask = new SdvFilesRefreshTask(remoteSdvFileManager, remoteSdvFileSetAdapter, remoteRefreshButton);
+        localSdvFilesRefreshTask = new SdvFilesRefreshTask(localSdvFileManager, localSdvFileSetAdapter, localRefreshButton);
 
-        sdvFileCopyTask = new SdvFileCopyTask(fetchButton, getFilesDir());
+        copyRemoteToLocalOverrideTask = new SdvFileSdvFileCopyOverwriteTask(fetchButton, localSdvFileManager);
+        copyRemoteToLocalIncreaseIndexTask = new SdvFileSdvFileCopyIncreaseIndexTask(fetchButton, localSdvFileManager);
+
         handler = new Handler(Looper.getMainLooper());
     }
 
     private void startEditor() {
 
         Intent intent = new Intent(this, SdvEditorActivity.class);
-        String selection = ""+localSdvFileSetAdapter.getSelection();
+        String selection = "" + localSdvFileSetAdapter.getSelection();
         intent.putExtra(SdvEditorActivity.LOCAL_SDVSET_INDEX, selection);
 
         localSdvFileSetAdapter.setSelection(-1);
@@ -114,13 +124,52 @@ public class MainActivity extends AppCompatActivity {
 
     private void copyFromRemoteToLocal() {
         int index = remoteSdvFileSetAdapter.getSelection();
-        if(index >= 0){
-            fetchButton.setEnabled(false);
-            sdvFileCopyTask.setSource(remoteSdvFileSetAdapter.getFileSet(index));
-            handler.post(() -> sdvFileCopyTask.run());
-        }else{
-            Log.d(LOG_TAG, "nok");
+        if (index >= 0) {
+            SdvFileSet sdvFileSet = remoteSdvFileSetAdapter.getFileSet(index);
+            if (localSdvFileManager.exists(sdvFileSet)) {
+                askForCopyRemoteToLocalAction(sdvFileSet);
+            }else{
+                copyRemoteToLocalOverride(sdvFileSet);
+            }
         }
+    }
+
+
+
+    private void askForCopyRemoteToLocalAction(SdvFileSet sdvFileSet) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("Please Select any option");
+        dialog.setTitle("Dialog Box");
+        dialog.setPositiveButton("OVERWRITE", (diag, which) -> copyRemoteToLocalOverride(sdvFileSet));
+        dialog.setNegativeButton("COPY", (diag, which) -> copyRemoteToLocalIncreaseIndex(sdvFileSet));
+        dialog.setCancelable(true);
+        AlertDialog alertDialog = dialog.create();
+        alertDialog.show();
+    }
+
+    private void askForCopyLocalToRemoteAction(SdvFileSet sdvFileSet) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setMessage("Please Select any option");
+        dialog.setTitle("Dialog Box");
+        dialog.setPositiveButton("OVERWRITE", (diag, which) -> copyRemoteToLocalOverride(sdvFileSet));
+        dialog.setNegativeButton("COPY", (diag, which) -> copyRemoteToLocalIncreaseIndex(sdvFileSet));
+        dialog.setCancelable(true);
+        AlertDialog alertDialog = dialog.create();
+        alertDialog.show();
+    }
+
+    private void copyRemoteToLocalIncreaseIndex(SdvFileSet sdvFileSet) {
+        fetchButton.setEnabled(false);
+        copyRemoteToLocalIncreaseIndexTask.setSource(sdvFileSet);
+        handler.post(() -> copyRemoteToLocalIncreaseIndexTask.run());
+        handler.post(() -> localSdvFilesRefreshTask.run());
+    }
+
+    private void copyRemoteToLocalOverride(SdvFileSet sdvFileSet) {
+        fetchButton.setEnabled(false);
+        copyRemoteToLocalOverrideTask.setSource(sdvFileSet);
+        handler.post(() -> copyRemoteToLocalOverrideTask.run());
+        handler.post(() -> localSdvFilesRefreshTask.run());
     }
 
     private void updateRemoteSdvFileInfoFromView(View view) {
@@ -146,10 +195,11 @@ public class MainActivity extends AppCompatActivity {
     private void updateLocalSdvFileInfo(SdvFileSet t) {
         updateSdvFileInfo(t, localSdvInfoTextView);
     }
+
     private void updateSdvFileInfo(SdvFileSet t, TextView textView) {
-        String info = "fileset: "+t.toString()+"\n"+
-                "player: "+t.getName()+"\n"+
-                "money: "+t.getMoney();
+        String info = "fileset: " + t.toString() + "\n" +
+                "player: " + t.getName() + "\n" +
+                "money: " + t.getMoney();
         textView.setText(info);
         console.print(t.toString());
     }

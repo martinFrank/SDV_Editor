@@ -5,6 +5,12 @@
     <string name="copy_from_sdv_to_local">fetch \u2B07</string>
     <string name="copy_to_sdv_from_local">push \u2B06</string>
     <string name="edit_local">edit</string>
+    <string name="delete_local">delete</string>
     <string name="editor_header">SDV Editor</string>
     <string name="save_changes">save changes \u2714</string>
+    <string name="cancel_editing">cancel \u2715</string>
+
+    <string name="property_name">property</string>
+    <string name="property_original">original</string>
+    <string name="property_editor">edit</string>
 </resources>

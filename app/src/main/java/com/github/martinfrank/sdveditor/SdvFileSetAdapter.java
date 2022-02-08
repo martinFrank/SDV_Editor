@@ -1,6 +1,5 @@
 package com.github.martinfrank.sdveditor;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,7 +84,7 @@ public class SdvFileSetAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.sdv_fileset_row_item, viewGroup, false);
+                .inflate(R.layout.sdv_fileset_adapter_row_item, viewGroup, false);
         view.setOnClickListener(mOnClickListener);
         views.add(view);
         return  new ViewHolder(view);

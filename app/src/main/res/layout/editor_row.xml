@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+
+    <TextView
+            android:text="@string/property_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/property_name"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_weight="1"/>
+    <TextView
+            android:text="@string/property_original"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/property_original"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_weight="1" />
+    <EditText
+            android:text="@string/property_editor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/property_edit"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:layout_weight="1" android:clickable="true"/>
+</LinearLayout>
