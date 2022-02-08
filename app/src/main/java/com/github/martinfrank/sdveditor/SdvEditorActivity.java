@@ -1,10 +1,12 @@
 package com.github.martinfrank.sdveditor;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.text.*;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import com.github.martinfrank.sdvedit.SdvFileManager;
 import com.github.martinfrank.sdvedit.SdvFileSet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -23,6 +26,8 @@ public class SdvEditorActivity extends AppCompatActivity {
 
     public static final String LOCAL_SDVSET_INDEX = "com.github.martinfrank.sdveditor.LOCAL_SDVSET_INDEX";
     public static final String LOG_TAG = "SDV_EDITOR";
+
+    private List<PropertyRow> properties = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,12 @@ public class SdvEditorActivity extends AppCompatActivity {
         SdvFileSet fileSet = sdvFileSets.get(Integer.parseInt(message));
         Log.d(LOG_TAG, "fileset: " + fileSet);
 
+        Button cancelButton = findViewById(R.id.cancel_edit);
+        cancelButton.setOnClickListener(view -> finish());
+
+        Button saveButton = findViewById(R.id.saveChanges);
+        saveButton.setOnClickListener(view -> askForSave(fileSet));
+
         LinearLayout linearLayout = findViewById(R.id.property_container);
         LayoutInflater inflater = LayoutInflater.from(this);
 
@@ -44,36 +55,38 @@ public class SdvEditorActivity extends AppCompatActivity {
 
         Consumer<String> setter = (value) -> fileSet.setMoney(Integer.parseInt(value));
         Supplier<String> getter = () -> ""+fileSet.getMoney();
-        createRow(row, "Money", getter, setter, InputType.TYPE_CLASS_NUMBER, new MinMaxFilter(0,999999999));
-
-
+        PropertyRow propertyRow = new PropertyRow(row, "Money", getter, setter, InputType.TYPE_CLASS_NUMBER, new MinMaxFilter(0,999999999));
+        properties.add(propertyRow);
     }
 
-    private void createRow(View row, String propertyName, Supplier<String> getter, Consumer<String> setter, int fieldType, InputFilter... filter) {
-        TextView property_name = row.findViewById(R.id.property_name);
-        property_name.setText(propertyName);
-        TextView property_original = row.findViewById(R.id.property_original);
-        property_original.setText(getter.get());
-        EditText property_editor = row.findViewById(R.id.property_edit);
-        property_editor.setText(getter.get());
-        property_editor.setInputType(fieldType);
-        property_editor.setFilters(filter);
-        property_editor.addTextChangedListener(new TextWatcher() {
 
-            public void afterTextChanged(Editable s) {
-                setter.accept(s.toString());
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-        });
+    @Override
+    public void finish() {
+        AlertDialog.Builder alterDialog = new AlertDialog.Builder(this);
+        alterDialog.setMessage("return?");
+        alterDialog.setTitle("abort");
+        alterDialog.setPositiveButton("exit!", (dialog, which) -> super.finish());
+        alterDialog.setCancelable(true);
+        AlertDialog alertDialog = alterDialog.create();
+        alertDialog.show();
     }
+
+    private void askForSave(SdvFileSet fileSet) {
+        AlertDialog.Builder alterDialog = new AlertDialog.Builder(this);
+        alterDialog.setMessage("save?");
+        alterDialog.setTitle("save");
+        alterDialog.setPositiveButton("confirm!", (dialog, which) -> saveChanges(fileSet));
+        alterDialog.setCancelable(true);
+        AlertDialog alertDialog = alterDialog.create();
+        alertDialog.show();
+    }
+
+    private void saveChanges(SdvFileSet fileSet) {
+        //FIXME as Async Task!!
+        fileSet.saveChanges();
+        properties.forEach(PropertyRow::updateOriginal);
+    }
+
+
+
 }

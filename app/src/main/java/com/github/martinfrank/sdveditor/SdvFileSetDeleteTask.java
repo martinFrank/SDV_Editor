@@ -5,13 +5,13 @@ import android.widget.Button;
 import com.github.martinfrank.sdvedit.SdvFileManager;
 import com.github.martinfrank.sdvedit.SdvFileSet;
 
-public abstract class AbstractSdvFileCopyTask implements Runnable{
+public class SdvFileSetDeleteTask implements Runnable{
 
     private final Button button;
     private final SdvFileManager sdvFileManager;
     private SdvFileSet source;
 
-    public AbstractSdvFileCopyTask(Button button, SdvFileManager sdvFileManager) {
+    public SdvFileSetDeleteTask(Button button, SdvFileManager sdvFileManager) {
         this.button = button;
         this.sdvFileManager = sdvFileManager;
     }
@@ -19,12 +19,10 @@ public abstract class AbstractSdvFileCopyTask implements Runnable{
     @Override
     public void run() {
         Log.d(MainActivity.LOG_TAG, "run.copy start...");
-        executeCopy(sdvFileManager, source);
+        sdvFileManager.delete(source);
         Log.d(MainActivity.LOG_TAG, "run.copy done...");
         button.setEnabled(true);
     }
-
-    public abstract void executeCopy(SdvFileManager sdvFileManager, SdvFileSet source);
 
     public void setSource(SdvFileSet source) {
         this.source = source;
