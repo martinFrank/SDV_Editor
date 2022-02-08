@@ -13,4 +13,22 @@
     <string name="property_name">property</string>
     <string name="property_original">original</string>
     <string name="property_editor">edit</string>
+
+    <string name="confirm_deletion_title">Confirm deletion</string>
+    <string name="confirm_deletion_message">Really delete Savegame?</string>
+    <string name="confirm_deletion_confirm">CONFIRM!</string>
+
+    <string name="confirm_copy_title">Savegame already exists!</string>
+    <string name="confirm_copy_message">This Savegame already exists local! What would you like to do?</string>
+    <string name="confirm_copy_overwrite">OVERWRITE!</string>
+    <string name="confirm_copy_increase_index">COPY!</string>
+
+    <string name="cancel_editing_title">Confirm abort editing</string>
+    <string name="cancel_editing_message">Really abort editing Savegame? All unsaved changes will be lost!</string>
+    <string name="cancel_editing_confirm">YES - ABORT!</string>
+
+    <string name="confirm_save_changes_title">Confirm save changes</string>
+    <string name="confirm_save_changes_message">Really save changes? This operation can not be undone!</string>
+    <string name="confirm_save_changes_confirm">YES - SAVE!</string>
+
 </resources>

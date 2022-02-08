@@ -122,9 +122,9 @@ public class MainActivity extends AppCompatActivity {
         if (index >= 0) {
             SdvFileSet sdvFileSet = localSdvFileSetAdapter.getFileSet(index);
             AlertDialog.Builder alterDialog = new AlertDialog.Builder(this);
-            alterDialog.setMessage("really delete Savegame?");
-            alterDialog.setTitle("Confirm deletion");
-            alterDialog.setPositiveButton("CONFIRM", (dialog, which) -> deleteLocal(sdvFileSet));
+            alterDialog.setMessage(R.string.confirm_deletion_message);
+            alterDialog.setTitle(R.string.confirm_deletion_title);
+            alterDialog.setPositiveButton(R.string.confirm_deletion_confirm, (dialog, which) -> deleteLocal(sdvFileSet));
             alterDialog.setCancelable(true);
             AlertDialog alertDialog = alterDialog.create();
             alertDialog.show();
@@ -132,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deleteLocal(SdvFileSet sdvFileSet) {
-        //FIXME Task needed?
         deleteButton.setEnabled(false);
         deleteLocalTask.setSource(sdvFileSet);
         handler.post(() -> deleteLocalTask.run());
@@ -143,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, SdvEditorActivity.class);
         String selection = "" + localSdvFileSetAdapter.getSelection();
-        intent.putExtra(SdvEditorActivity.LOCAL_SDVSET_INDEX, selection);
+        intent.putExtra(SdvEditorActivity.LOCAL_SDVFILESET_INDEX, selection);
 
         localSdvFileSetAdapter.setSelection(-1);
         localSdvInfoTextView.setText("");
@@ -153,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshLocalSdvFiles() {
-        console.print("refreshing local sdv file list - start...");
         localRefreshButton.setEnabled(false);
         localSdvInfoTextView.setText("");
         handler.post(() -> localSdvFileSetsRefreshTask.run());
@@ -187,10 +185,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void askForCopyRemoteToLocalAction(SdvFileSet sdvFileSet) {
         AlertDialog.Builder alterDialog = new AlertDialog.Builder(this);
-        alterDialog.setMessage("This Savegame already exists local! What would you like to do?");
-        alterDialog.setTitle("Savegame already exists");
-        alterDialog.setPositiveButton("OVERWRITE", (dialog, which) -> copyRemoteToLocalOverride(sdvFileSet));
-        alterDialog.setNegativeButton("COPY", (dialog, which) -> copyRemoteToLocalIncreaseIndex(sdvFileSet));
+        alterDialog.setMessage(R.string.confirm_copy_message);
+        alterDialog.setTitle(R.string.confirm_copy_title);
+        alterDialog.setPositiveButton(R.string.confirm_copy_overwrite, (dialog, which) -> copyRemoteToLocalOverride(sdvFileSet));
+        alterDialog.setNegativeButton(R.string.confirm_copy_increase_index, (dialog, which) -> copyRemoteToLocalIncreaseIndex(sdvFileSet));
         alterDialog.setCancelable(true);
         AlertDialog alertDialog = alterDialog.create();
         alertDialog.show();
@@ -198,10 +196,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void askForCopyLocalToRemoteAction(SdvFileSet sdvFileSet) {
         AlertDialog.Builder alterDialog = new AlertDialog.Builder(this);
-        alterDialog.setMessage("This Savegame already exists in your Game! What would you like to do?");
-        alterDialog.setTitle("Savegame already exists");
-        alterDialog.setPositiveButton(R.string.app_name, (dialog, which) -> copyLocalToRemoteOverride(sdvFileSet));//FIXME: "OVERWRITE"
-        alterDialog.setNegativeButton("COPY", (dialog, which) -> copyLocalToRemoteIncreaseIndex(sdvFileSet));
+        alterDialog.setMessage(R.string.confirm_copy_message);
+        alterDialog.setTitle(R.string.confirm_copy_title);
+        alterDialog.setPositiveButton(R.string.confirm_copy_overwrite, (dialog, which) -> copyLocalToRemoteOverride(sdvFileSet));
+        alterDialog.setNegativeButton(R.string.confirm_copy_increase_index, (dialog, which) -> copyLocalToRemoteIncreaseIndex(sdvFileSet));
         alterDialog.setCancelable(true);
         AlertDialog alertDialog = alterDialog.create();
         alertDialog.show();

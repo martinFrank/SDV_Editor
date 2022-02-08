@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 public class PropertyRow {
 
     private final Supplier<String> getter;
-    private TextView property_original;
+    private final TextView property_original;
 
     public PropertyRow(View row, String propertyName, Supplier<String> getter, Consumer<String> setter, int fieldType, InputFilter... filter) {
         this.getter = getter;
